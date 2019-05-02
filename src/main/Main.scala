@@ -1,7 +1,7 @@
 import SGD._
 import Settings._
 import Utils._
-
+import scala.concurrent._
 import scala.util.Random
 
 object Main {
@@ -22,5 +22,14 @@ object Main {
     var validation_losses = Vector.empty[Double]
     var epoch_durations_cum = Vector.empty[Double]
 
+    while(validation_loss >= 0.3) {
+      val service: ExecutorService = Executors.newFixedThreadPool(workers)
+
+      val gradients = Future{
+        val sample = Random.shuffle(train_set).take(batch_size).toVector
+        val gradients = sgd_subset(sample, wb.value, regParam, D)
+      }(service)
+
+    }
   }
 }
