@@ -1,0 +1,17 @@
+# Project
+src/main/resources
+project/
+
+# Mac
+.DS_STORE
+
+# Scala
+target
+*.class
+
+# IntelliJ
+*.iml
+*.ipr
+*.iws
+.idea
+out
