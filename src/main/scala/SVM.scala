@@ -1,20 +1,20 @@
 import scala.collection.concurrent.TrieMap
 
-object SGD {
+object SVM {
 
-  def sgd_subset(train_XY: Vector[(Int, (Map[Int, Float], Int))], W: TrieMap[Int, Double], regParam: Double, D:Int) =  {
+  def sgd_subset(train_XY: Vector[(Int, (Map[Int, Float], Int))], W: TrieMap[Int, Double], regParam: Double, D: Int) =  {
     /*    Computes stochastic gradient descent for a partition (in memory) */
 
     val wsub = W
     val grads = train_XY.map(xy => (compute_gradient(xy._2._1, xy._2._2, wsub, regParam, D)))
     grads.reduce((x, y) => {
       val list = x.toList ++ y.toList
-      val merged = list.groupBy ( _._1) .map { case (k,v) => k -> v.map(_._2).sum }
+      val merged = list.groupBy( _._1).map{ case (k,v) => k -> v.map(_._2).sum }
       merged
     })
   }
 
-  def compute_gradient(xn: Map[Int, Float], yn: Double, wsub: Vector[Double], regParam: Double, D: Int) = {
+  def compute_gradient(xn: Map[Int, Float], yn: Double, wsub: TrieMap[Int, Double], regParam: Double, D: Int) = {
     /* Computes the batch gradient for each datapoint */
 
     val grad = xn.mapValues(xi => { if(is_support(yn, xn, wsub)) xi * -yn else 0})
@@ -22,7 +22,7 @@ object SGD {
     grad
   }
 
-  def is_support(yn: Double, xn: Map[Int, Float], w: Vector[Double]) = {
+  def is_support(yn: Double, xn: Map[Int, Float], w: TrieMap[Int, Double]) = {
     /* Checks if a datapoint is support */
 
     yn * xn.map(x => w(x._1) * x._2).sum < 1
@@ -33,11 +33,11 @@ object SGD {
 
     val wsub = W
     val loss = hinge_loss(train_XY, wsub).sum
-    val reg = wsub.map(w => w * w).sum * regParam / 2
+    val reg = wsub.values.map(w => w * w).sum * regParam / 2
     reg + loss
   }
 
-  def hinge_loss(XY: Vector[(Int, (Map[Int, Float], Int))], w: Vector[Double]) = {
+  def hinge_loss(XY: Vector[(Int, (Map[Int, Float], Int))], w: TrieMap[Int, Double]) = {
     /* Computes the hinge loss over several points */
     val wsub = w
     XY.map(v => {
