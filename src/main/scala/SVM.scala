@@ -1,6 +1,8 @@
+import scala.collection.concurrent.TrieMap
+
 object SGD {
 
-  def sgd_subset(train_XY: Vector[(Int, (Map[Int, Float], Int))], W: Vector[Double], regParam: Double, D:Int) =  {
+  def sgd_subset(train_XY: Vector[(Int, (Map[Int, Float], Int))], W: TrieMap[Int, Double], regParam: Double, D:Int) =  {
     /*    Computes stochastic gradient descent for a partition (in memory) */
 
     val wsub = W
@@ -26,7 +28,7 @@ object SGD {
     yn * xn.map(x => w(x._1) * x._2).sum < 1
   }
 
-  def compute_loss(train_XY: Vector[(Int, (Map[Int, Float], Int))], W: Vector[Double], regParam: Double) = {
+  def compute_loss(train_XY: Vector[(Int, (Map[Int, Float], Int))], W: TrieMap[Int, Double], regParam: Double): Double = {
     /* Computes the loss over several points  */
 
     val wsub = W
