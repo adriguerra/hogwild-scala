@@ -1,7 +1,9 @@
 import Settings._
 import Utils._
 
+import scala.collection.concurrent.TrieMap
 import scala.util.Random
+import SGD._
 
 object Main {
   def main(args: Array[String]) = {
@@ -12,12 +14,12 @@ object Main {
     // Load data and split it into train/test
     val data = load_reuters_data(train_path, topics_path, test_paths, "CCAT", true)
 
-    val shuffled = Random.shuffle(List(data))
+    val shuffled = Random.shuffle(data)
     val (train_set, test_set) = shuffled.splitAt(math.ceil(data.length*train_proportion).toInt)
 
 
     // Initialize weights, training_losses and array containing cumulated durations of epochs
-//    val weights = new TrieMap[Int, Float]()
+    var weights = new TrieMap[Int, Double]()
 
     var training_losses = Vector.empty[Double]
     var validation_losses = Vector.empty[Double]
@@ -33,19 +35,20 @@ object Main {
 
     while(validation_loss >= 0.3) {
 
-      // Compute gradient at each node using accessor
-//        for (i <- 1 to workers) {
-//          val thread = new Thread {
-//            override def run {
-//              val sample = Random.shuffle(train_set).take(batch_size).toVector
-////              val gradients = sgd_subset(sample, wb.value, regParam, D)
-////              weights = weights.map()
-//            }
-//          }
-//          thread.start
-//
-//          Thread.sleep(50) // slow the loop down a bit
-//        }
+        // Compute gradient at each node using accessor
+        for (i <- 1 to workers) {
+          val thread = new Thread {
+            override def run {
+              val sample = Random.shuffle(train_set).take(batch_size).toVector
+              val gradients = sgd_subset(sample, weights, regParam, D)
+              val grad_keys = gradients.keys.toVector
+              gradients.foreach(g => weights.update(g._1, g._2 - alpha*gradients(g._1)))
+            }
+          }
+          thread.start
+
+          Thread.sleep(50) // slow the loop down a bit
+        }
 
 
       // Merge gradients computed at each partitions
