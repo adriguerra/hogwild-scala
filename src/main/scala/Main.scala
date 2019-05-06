@@ -21,7 +21,7 @@ object Main {
 
     // Initialize weights, training_losses and array containing cumulated durations of epochs
     val weights = new TrieMap[Int, Double]()
-    (0 until D).foreach(index => weights += ((index, 0f)))
+    (0 until D).foreach(index => weights += ((index, 0d)))
 
     // Getting set up time
     val load_duration = (System.nanoTime - t1) / 1e9d
