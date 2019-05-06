@@ -1,7 +1,6 @@
-import SGD._
 import Settings._
 import Utils._
-import scala.concurrent._
+
 import scala.util.Random
 
 object Main {
@@ -14,37 +13,49 @@ object Main {
     val data = load_reuters_data(train_path, topics_path, test_paths, "CCAT", true)
 
     val shuffled = Random.shuffle(List(data))
-    val (train_set, test_set) = shuffled.splitAt(math.ceil(data.length*train_proportion))
+    val (train_set, test_set) = shuffled.splitAt(math.ceil(data.length*train_proportion).toInt)
+
 
     // Initialize weights, training_losses and array containing cumulated durations of epochs
-    var weights = Vector.fill(D)(0.0)
+//    val weights = new TrieMap[Int, Float]()
+
     var training_losses = Vector.empty[Double]
     var validation_losses = Vector.empty[Double]
     var epoch_durations_cum = Vector.empty[Double]
 
-    // Creates partition accessor
-//    val range = sc.parallelize((1 to workers).zip(1 to workers))
-//    val access = range.partitionBy(new RangePartitioner(workers, range, true))
+    // Getting set up time
+    val load_duration = (System.nanoTime - t1) / 1e9d
+    println("Set up duration: " + load_duration)
 //
-//    // Getting set up time
-//    val load_duration = (System.nanoTime - t1) / 1e9d
-//    println("Set up duration: " + load_duration)
-//
-//    // The start of training epochs
-//    val t2 = System.nanoTime()
-//    var validation_loss = 1.0
-//
-    while(validation_loss >= 0.3) {
-//
-//      // Spread weights to all nodes
-//      val wb = sc.broadcast(weights)
-      val service: ExecutorService = Executors.newFixedThreadPool(workers)
+    // The start of training epochs
+    val t2 = System.nanoTime()
+    var validation_loss = 1.0
 
-      val gradients = Future{
-        val sample = Random.shuffle(train_set).take(batch_size).toVector
-        val gradients = sgd_subset(sample, wb.value, regParam, D)
-      }(service)
-//      // Compute gradient at each node using accessor
+    while(validation_loss >= 0.3) {
+
+      // Compute gradient at each node using accessor
+//        for (i <- 1 to workers) {
+//          val thread = new Thread {
+//            override def run {
+//              val sample = Random.shuffle(train_set).take(batch_size).toVector
+////              val gradients = sgd_subset(sample, wb.value, regParam, D)
+////              weights = weights.map()
+//            }
+//          }
+//          thread.start
+//
+//          Thread.sleep(50) // slow the loop down a bit
+//        }
+
+
+      // Merge gradients computed at each partitions
+//      val gradient = gradients.reduce((x, y) => {
+//        val list = x.toList ++ y.toList
+//        val merged = list.groupBy ( _._1) .map { case (k,v) => k -> v.map(_._2).sum }
+//        merged
+//      })
+
+      // Compute gradient at each node using accessor
 //      val gradients = access.mapPartitions(it => {
 //        val sample = Random.shuffle(b_train_set.value).take(batch_size).toVector
 //        val gradients = sgd_subset(sample, wb.value, regParam, D)
