@@ -1,6 +1,5 @@
-import SGD._
-import Settings._
 import Utils._
+
 import scala.concurrent._
 import scala.util.Random
 
