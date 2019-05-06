@@ -5,7 +5,6 @@ object Settings {
   val D = 47237
   val N = 23149
   val workers = 6
-  val nb_epochs = 10
   val batch_size = 100
   val alpha = 0.03 * (100.0 / batch_size)
   val regParam = 1e-5
