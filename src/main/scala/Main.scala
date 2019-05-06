@@ -1,4 +1,4 @@
-import SGD._
+import SVM._
 import Settings._
 import Utils._
 
@@ -17,9 +17,11 @@ object Main {
     val shuffled = Random.shuffle(data)
     val (train_set, test_set) = shuffled.splitAt(math.ceil(data.length*train_proportion).toInt)
 
+    val test_set_length = test_set.length
 
     // Initialize weights, training_losses and array containing cumulated durations of epochs
     val weights = new TrieMap[Int, Double]()
+    (0 until D).foreach(index => weights += ((index, 0f)))
 
     // Getting set up time
     val load_duration = (System.nanoTime - t1) / 1e9d
@@ -34,7 +36,8 @@ object Main {
               val sample = Random.shuffle(train_set).take(batch_size).toVector
               val gradients = sgd_subset(sample, weights, regParam, D)
               gradients.foreach(g => weights.update(g._1, g._2 - alpha * gradients(g._1)))
-              validation_loss = compute_loss(test_set.toVector, weights, regParam)
+              validation_loss = compute_loss(test_set.toVector, weights, regParam) / test_set_length
+              println(i + " : " + validation_loss)
             }
           }
         }

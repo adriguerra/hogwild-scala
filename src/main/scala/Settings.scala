@@ -7,7 +7,7 @@ object Settings {
   val workers = 6
   val nb_epochs = 10
   val batch_size = 100
-  val alpha = 0.03 * (100.0 / batch_size) / workers
+  val alpha = 0.03 * (100.0 / batch_size)
   val regParam = 1e-5
   val topics_path = "/data/datasets/rcv1-v2.topics.qrels"
   val test_paths = List("/data/datasets/lyrl2004_vectors_test_pt0.dat",
