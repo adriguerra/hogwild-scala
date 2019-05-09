@@ -41,6 +41,7 @@ object Main {
               gradients.foreach(g => weights.update(g._1, weights(g._1) - alpha * gradients(g._1)))
               validation_loss = compute_loss(test_set.toVector, weights, regParam) / test_set_length
               validation_losses :+= validation_loss
+              println(validation_loss)
             }
             println(i + " : " + validation_losses)
           }
@@ -49,9 +50,6 @@ object Main {
         thread
       }
 
-    val algo_duration = (System.nanoTime - t2) / 1e9d
-    println("Algorithm duration: " + algo_duration)
-
 //    var validation_loss = 1.0
 //    while (validation_loss >= 0.3) {
 //      validation_loss = compute_loss(test_set.toVector, weights, regParam) / test_set_length
@@ -59,5 +57,7 @@ object Main {
 //    }
     threads.foreach(t => t.join())
 
+    val algo_duration = (System.nanoTime - t2) / 1e9d
+    println("Algorithm duration: " + algo_duration)
   }
 }
