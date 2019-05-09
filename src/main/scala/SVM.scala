@@ -9,7 +9,7 @@ object SVM {
     val grads = train_XY.map(xy => (compute_gradient(xy._2._1, xy._2._2, wsub, regParam, D)))
     grads.reduce((x, y) => {
       val list = x.toList ++ y.toList
-      val merged = list.groupBy( _._1).map{ case (k,v) => k -> v.map(_._2).sum }
+      val merged = list.groupBy(_._1).map{ case (k,v) => k -> v.map(_._2).sum }
       merged
     })
   }

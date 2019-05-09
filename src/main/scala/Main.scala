@@ -27,24 +27,37 @@ object Main {
     val load_duration = (System.nanoTime - t1) / 1e9d
     println("Set up duration: " + load_duration)
 
+    val t2 = System.nanoTime()
+
     val threads =
       for (i <- 1 to workers) yield {
         val thread = new Thread {
           override def run {
+            var validation_losses = Vector.empty[Double]
             var validation_loss = 1.0
             while (validation_loss >= 0.3) {
               val sample = Random.shuffle(train_set).take(batch_size).toVector
-              val gradients = sgd_subset(sample, weights, regParam, D)
+              val gradients = sgd_subset(sample, weights.snapshot(), regParam, D)
               gradients.foreach(g => weights.update(g._1, weights(g._1) - alpha * gradients(g._1)))
               validation_loss = compute_loss(test_set.toVector, weights, regParam) / test_set_length
-              println(i + " : " + validation_loss)
+              validation_losses :+= validation_loss
             }
+            println(i + " : " + validation_losses)
           }
         }
         thread.start()
         thread
       }
 
+    val algo_duration = (System.nanoTime - t2) / 1e9d
+    println("Algorithm duration: " + algo_duration)
+
+//    var validation_loss = 1.0
+//    while (validation_loss >= 0.3) {
+//      validation_loss = compute_loss(test_set.toVector, weights, regParam) / test_set_length
+//      println(validation_loss)
+//    }
     threads.foreach(t => t.join())
+
   }
 }
