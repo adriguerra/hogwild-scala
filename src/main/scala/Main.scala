@@ -33,7 +33,7 @@ object Main {
     val thread_val_loss = new Thread{
       override def run{
         while(validation_loss >= 0.3){
-      validation_loss = compute_loss(test_set.toVector, weights, regParam) / test_set_length
+      validation_loss = compute_loss(test_set.toVector, weights.snapshot(), regParam) / test_set_length
         println(validation_loss)}
     }}
     thread_val_loss.start()
@@ -45,7 +45,7 @@ object Main {
           override def run {
             while(validation_loss >= 0.3){
               val sample = Random.shuffle(train_set).take(batch_size).toVector
-              val gradients = sgd_subset(sample, weights, regParam, D)
+              val gradients = sgd_subset(sample, weights.snapshot(), regParam, D)
               val du = gradients.filter(x => x._2!=0).size
               gradients.foreach(g => weights.update(g._1, weights(g._1) - alpha * gradients(g._1)/du))
           }}
