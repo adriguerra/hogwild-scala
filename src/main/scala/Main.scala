@@ -35,10 +35,14 @@ object Main {
             while (validation_loss >= 0.3) {
               val sample = Random.shuffle(train_set).take(batch_size).toVector
               val gradients = sgd_subset(sample, weights, regParam, D)
-              gradients.foreach(g => weights.update(g._1, weights(g._1) - alpha * gradients(g._1)))
+
+              val du = gradients.filter(x => x._2!=0).size
+
+              gradients.foreach(g => weights.update(g._1, weights(g._1) - alpha * gradients(g._1)/du))
               validation_loss = compute_loss(test_set.toVector, weights, regParam) / test_set_length
-              println(i + " : " + validation_loss)
-            }
+              println(i + " : " + validation_loss)}
+
+
           }
         }
         thread.start()
