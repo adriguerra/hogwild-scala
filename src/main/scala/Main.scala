@@ -1,6 +1,7 @@
 import SVM._
 import Settings._
 import Utils._
+import scala.collection.mutable
 
 import scala.collection.concurrent.TrieMap
 import scala.util.Random
@@ -17,16 +18,20 @@ object Main {
     val shuffled = Random.shuffle(data)
     val (train_set, test_set) = shuffled.splitAt(math.ceil(data.length*train_proportion).toInt)
 
+
     val test_set_length = test_set.length
 
     // Initialize weights, training_losses and array containing cumulated durations of epochs
     //var weights = Map[Int, Double]
-    //var weights = (0 until D).map(index => ((index, 0d))).toMap
+    val weights = mutable.Map[Int, Double]()
+
+    //val weights = (0 until D).map(index => ((index, 0d))).toMap
+    (0 until D).foreach(index => weights.update(index, 0d))
 
 
     //HHHHHHHHHHHHHHHHH
-    val weights = new TrieMap[Int, Double]()
-    (0 until D).foreach(index => weights += ((index, 0d)))
+    //val weights = new TrieMap[Int, Double]()
+    //(0 until D).foreach(index => weights += ((index, 0d)))
 
     // Getting set up time
     val load_duration = (System.nanoTime - t1) / 1e9d
@@ -50,23 +55,26 @@ object Main {
 //    thread_val_loss.start()
 
     // Threads of workers computing the gradients and updating the weights
+    val nn = train_set.length
+    val t2 = System.nanoTime()
     val threads =
       for (i <- 1 to workers) yield {
         val thread = new Thread {
           override def run {
             while(validation_loss >= 0.3){
-              val sample = Random.shuffle(train_set).take(batch_size)
-              val gradients = sgd_subset(sample, weights, regParam, D)
-              val du = gradients.filter(x => x._2 != 0).size
+              val sample = Random.nextInt(nn)
+              train_set(sample)
+              val gradients = sgd_subset(train_set(sample), weights, regParam, D)
+              //val du = gradients.filter(x => x._2 != 0)
               //gradients.foreach(g => weights.update(g._1, weights(g._1) - alpha * gradients(g._1)/du))
               // Update weights
-              //gradients.foreach(g => weights += (g._1 ->
-                //(weights(g._1) - alpha * gradients(g._1)/du)))
+              //weights.map(x => )
+              //gradients.filter(x => x._2 != 0).foreach(g => weights += (g._1 -> (weights(g._1) - alpha * gradients(g._1))))
 
-              gradients.foreach(g => weights.update(g._1, weights(g._1) - alpha * gradients(g._1)/du))
+              gradients.foreach(g => weights.update(g._1, weights(g._1) - alpha * gradients(g._1)))
 
 
-              validation_loss = compute_loss(test_set.toVector, weights, regParam) / test_set_length
+              validation_loss = compute_loss(test_set, weights, regParam) / test_set_length
               println(validation_loss)
           }}
         }
@@ -76,6 +84,10 @@ object Main {
 
 
     threads.foreach(t => t.join())
+    val duration = (System.nanoTime()-t2)/1e9d
+    println("Duration " + duration)
     //thread_val_loss.join()
+    //println("finished")
   }
+
 }
