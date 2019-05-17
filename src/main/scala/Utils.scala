@@ -1,4 +1,5 @@
 import scala.io.Source
+import scala.util.Random
 
 object Utils {
 
@@ -70,6 +71,16 @@ object Utils {
       (s.tail.head.toInt, s.head)
     }).toList
     lines.groupBy(_._1).mapValues(l => l.map(_._2))
+  }
+
+  def sampleWithoutReplacement(to: Int, count: Int): Vector[Int] = {
+    var samples = Set[Int]()
+
+    while (samples.size < count) {
+      samples = samples + Random.nextInt(to)
+    }
+
+    return samples.toVector
   }
 }
 
